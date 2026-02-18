@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGER - Onboarding Flow States</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  /* ─── Global ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sena-green: #30AD05;
+    --sena-green-hover: #5ba730;
+    --bg-primary: #ecf0f4;
+    --bg-secondary: #ffffff;
+    --text-primary: #76809a;
+    --text-dark: #0C2D48;
+    --text-fourth: #3a3f51;
+    --header-green: #30AD05;
+    --red: #ef4444;
+    --orange: #ffbb33;
+    --green-ok: #00C851;
+    --shadow: 0 2px 10px rgba(0,0,0,.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+  }
+  body {
+    font-family: 'Work Sans', system-ui, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  /* ─── Page Header ─── */
+  .page-header {
+    background: linear-gradient(135deg, #0C2D48 0%, #1a4a6e 100%);
+    color: #fff;
+    padding: 48px 32px 40px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.5px; }
+  .page-header p { font-size: 1.05rem; opacity: .8; margin-top: 8px; max-width: 640px; margin-inline: auto; }
+  .badge { display: inline-block; background: var(--sena-green); color: #fff; font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ─── Flow navigation ─── */
+  .flow-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 16px;
+    flex-wrap: wrap;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .flow-nav a {
+    text-decoration: none;
+    font-weight: 600;
+    font-size: .82rem;
+    padding: 8px 18px;
+    border-radius: 99px;
+    color: var(--text-primary);
+    border: 1.5px solid #dde1e8;
+    transition: all .2s;
+  }
+  .flow-nav a:hover, .flow-nav a.active {
+    background: var(--sena-green);
+    color: #fff;
+    border-color: var(--sena-green);
+  }
+
+  /* ─── Flow Section ─── */
+  .flow-section {
+    max-width: 1260px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .flow-section-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-section-title .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--sena-green);
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-section-subtitle {
+    color: var(--text-primary);
+    font-size: .92rem;
+    margin-bottom: 28px;
+    padding-left: 46px;
+  }
+
+  /* ─── State Grid ─── */
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+  }
+  .state-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .state-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  .state-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #fff;
+  }
+  .state-label.default   { background: #64748b; }
+  .state-label.loading   { background: #3b82f6; }
+  .state-label.error     { background: #ef4444; }
+  .state-label.success   { background: #22c55e; }
+  .state-label.warning   { background: #f59e0b; }
+  .state-label.info      { background: #8b5cf6; }
+  .state-label .route-tag {
+    font-size: .65rem;
+    font-weight: 500;
+    background: rgba(255,255,255,.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ─── Phone Frame ─── */
+  .phone-frame {
+    padding: 20px;
+  }
+  .screen {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-primary);
+    position: relative;
+  }
+
+  /* ─── Reusable screen parts ─── */
+  .green-bar { background: var(--header-green); height: 6px; }
+  .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+  .nav-logo { font-weight: 800; font-size: .65rem; color: var(--text-dark); }
+  .nav-logo-sena { color: var(--sena-green); font-weight: 800; font-size: .75rem; }
+
+  /* ─── Login Screen Mock ─── */
+  .login-layout {
+    display: flex;
+    padding: 16px;
+    gap: 16px;
+    background: #fff;
+    min-height: 260px;
+  }
+  .login-slider {
+    flex: 1.4;
+    background: linear-gradient(135deg, #e8f5e2 0%, #c8e6c0 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sena-green);
+    font-size: .7rem;
+    font-weight: 600;
+    min-height: 200px;
+  }
+  .login-slider-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    justify-content: center;
+  }
+  .login-slider-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sena-green);
+    opacity: .3;
+  }
+  .login-slider-dots span.active { opacity: 1; }
+
+  .login-form-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+  .sena-logo-placeholder {
+    width: 90px; height: 40px;
+    background: var(--sena-green);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: .7rem;
+    margin-bottom: 16px;
+  }
+  .mock-label {
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    align-self: flex-start;
+    margin-bottom: 4px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .mock-input {
+    width: 100%;
+    height: 32px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 16px;
+    padding: 0 12px;
+    font-size: .7rem;
+    color: var(--text-primary);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  .mock-input.error-border { border-color: var(--red); }
+  .mock-input.focus-border { border-color: var(--sena-green); box-shadow: 0 0 0 2px rgba(48,173,5,.15); }
+  .mock-input .eye-icon {
+    position: absolute;
+    right: 10px;
+    color: var(--sena-green);
+    font-size: .85rem;
+  }
+  .mock-input .placeholder { color: #adb5bd; font-size: .65rem; }
+  .mock-input .typed { color: #333; font-size: .7rem; }
+  .mock-input .dots { color: #333; font-size: .85rem; letter-spacing: 2px; }
+
+  .btn-green {
+    width: 100%;
+    height: 34px;
+    background: var(--sena-green);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: .72rem;
+    margin-top: 14px;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-green.disabled { opacity: .5; }
+  .btn-green-hover { background: var(--sena-green-hover); }
+
+  .forgot-link {
+    align-self: flex-end;
+    color: var(--sena-green);
+    font-size: .6rem;
+    text-decoration: none;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* ─── Footer mocks ─── */
+  .footer-sector {
+    background: var(--text-fourth);
+    padding: 6px 12px;
+    color: #f7f7f7;
+    font-size: .55rem;
+    font-weight: 600;
+  }
+  .footer-logos {
+    display: flex;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #fff;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .footer-logo-pill {
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: .5rem;
+    color: var(--text-primary);
+    filter: grayscale(100%);
+  }
+  .footer-gov {
+    background: var(--text-fourth);
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  .gov-link {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: .48rem;
+    color: #ccc;
+    text-decoration: none;
+  }
+  .gov-dot { width: 5px; height: 5px; border-radius: 2px; display: inline-block; }
+
+  /* ─── SweetAlert Mock ─── */
+  .swal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 10px;
+  }
+  .swal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    width: 80%;
+    max-width: 220px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.2);
+  }
+  .swal-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+  .swal-icon.error { background: #fef2f2; color: var(--red); border: 2px solid var(--red); }
+  .swal-icon.success { background: #f0fdf4; color: var(--green-ok); border: 2px solid var(--green-ok); }
+  .swal-icon.loading { background: #eff6ff; color: #3b82f6; border: 2px solid #3b82f6; }
+  .swal-title { font-size: .82rem; font-weight: 700; color: #333; margin-bottom: 4px; }
+  .swal-text { font-size: .62rem; color: #666; line-height: 1.4; }
+  .swal-btn {
+    margin-top: 10px;
+    padding: 5px 18px;
+    border-radius: 5px;
+    border: none;
+    font-size: .62rem;
+    font-weight: 600;
+    cursor: default;
+  }
+  .swal-btn.ok { background: #3085d6; color: #fff; }
+  .swal-btn.green { background: var(--sena-green); color: #fff; }
+  .swal-progress {
+    height: 3px;
+    background: var(--sena-green);
+    border-radius: 2px;
+    margin-top: 8px;
+    width: 60%;
+  }
+
+  /* ─── Spinner ─── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin .8s linear infinite;
+  }
+  .spinner-blue {
+    width: 22px; height: 22px;
+    border: 3px solid #dbeafe;
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin .8s linear infinite;
+  }
+
+  /* ─── Recovery / Reset screen ─── */
+  .centered-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    background: var(--bg-primary);
+    padding: 20px;
+  }
+  .form-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    max-width: 260px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .form-card h3 {
+    font-size: .82rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .form-card h3 .icon-sync { color: var(--sena-green); }
+  .form-card p { font-size: .58rem; color: var(--text-primary); margin-bottom: 12px; }
+
+  .toggle-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .toggle-btn {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 4px;
+    background: var(--text-fourth);
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 600;
+    cursor: default;
+  }
+  .toggle-btn.selected { box-shadow: 0 3px 0 rgba(18,241,37,.32); font-weight: 700; }
+
+  .btn-submit {
+    width: 100%;
+    padding: 7px;
+    border: none;
+    border-radius: 4px;
+    background: var(--sena-green);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 600;
+    margin-top: 12px;
+    cursor: default;
+  }
+
+  /* ─── MUI Alert mock ─── */
+  .alert-error {
+    background: #fdeded;
+    border-left: 3px solid var(--red);
+    color: #5f2120;
+    font-size: .58rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  /* ─── Password strength bar ─── */
+  .strength-bars {
+    display: flex;
+    gap: 3px;
+    margin-top: 8px;
+  }
+  .strength-bar {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #e0e0e0;
+  }
+  .strength-bar.red { background: #ff4444; }
+  .strength-bar.orange { background: #ffbb33; }
+  .strength-bar.green { background: #00C851; }
+
+  /* ─── Protected / Dashboard mock ─── */
+  .dashboard-layout {
+    display: flex;
+    min-height: 280px;
+  }
+  .sidebar-mock {
+    width: 56px;
+    background: #0C2D48;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 12px;
+    gap: 14px;
+  }
+  .sidebar-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .55rem;
+    color: rgba(255,255,255,.5);
+  }
+  .sidebar-icon.active { background: var(--sena-green); color: #fff; }
+  .dash-content {
+    flex: 1;
+    padding: 14px;
+    background: var(--bg-primary);
+  }
+  .dash-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+  .dash-topbar .title { font-size: .72rem; font-weight: 700; color: var(--text-dark); }
+  .dash-topbar .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .58rem;
+    color: var(--text-primary);
+  }
+  .user-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--sena-green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .55rem;
+    font-weight: 700;
+  }
+  .dash-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    font-size: .6rem;
+    color: var(--text-primary);
+  }
+
+  /* ─── Flow connector lines ─── */
+  .flow-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .arrow-down {
+    width: 2px;
+    height: 32px;
+    background: var(--sena-green);
+    position: relative;
+  }
+  .arrow-down::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: -4px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid var(--sena-green);
+  }
+  .arrow-label {
+    font-size: .62rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-left: 10px;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ─── Profile page mock ─── */
+  .profile-sections { display: flex; flex-direction: column; gap: 10px; }
+  .profile-section-title {
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+    border-bottom: 1.5px solid var(--sena-green);
+    display: inline-block;
+  }
+  .field-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .field-mock {
+    flex: 1;
+    min-width: 70px;
+  }
+  .field-mock .flabel {
+    font-size: .48rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .field-mock .finput {
+    height: 22px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+    font-size: .5rem;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    color: #333;
+  }
+  .field-mock .finput.disabled {
+    background: #f1f5f9;
+    color: #999;
+  }
+
+  /* ─── Annotations ─── */
+  .annotation {
+    font-size: .62rem;
+    color: var(--text-primary);
+    padding: 10px 18px;
+    border-top: 1px dashed #dde1e8;
+    line-height: 1.5;
+  }
+  .annotation strong { color: var(--text-dark); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ PAGE HEADER ══════════════ -->
+<div class="page-header">
+  <h1>SIGER <span class="badge">Onboarding Flow</span></h1>
+  <p>Todos los estados de cada pantalla del flujo de autenticacion y onboarding. SENA - Direccion de Formacion Profesional</p>
+</div>
+
+<!-- ══════════════ STICKY NAV ══════════════ -->
+<nav class="flow-nav">
+  <a href="#login">1. Login</a>
+  <a href="#recovery">2. Recuperar Contrasena</a>
+  <a href="#reset">3. Restaurar Contrasena</a>
+  <a href="#dashboard">4. Dashboard (Redireccion)</a>
+  <a href="#profile">5. Actualizar Perfil</a>
+  <a href="#logout">6. Logout</a>
+</nav>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 1: LOGIN                         ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="flow-section" id="login">
+  <div class="flow-section-title"><span class="step-num">1</span> Login</div>
+  <div class="flow-section-subtitle">/login &mdash; Punto de entrada. Verifica sesion existente, muestra formulario o redirige.</div>
+
+  <div class="state-grid">
+
+    <!-- 1A: Initial / Empty -->
+    <div class="state-card">
+      <div class="state-label default">
+        <span>Estado Inicial</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout">
+            <div class="login-slider">
+              <div>
+                <div style="font-size:.8rem;margin-bottom:4px;">&#x1F4CA;</div>
+                <div>Slider Promocional</div>
+                <div class="login-slider-dots">
+                  <span class="active"></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+              <div class="mock-label">Numero de documento</div>
+              <div class="mock-input"><span class="placeholder">Ingrese su documento...</span></div>
+              <div class="mock-label">Contrasena</div>
+              <div class="mock-input">
+                <span class="placeholder">Ingrese su contrasena...</span>
+                <span class="eye-icon">&#x1F441;</span>
+              </div>
+              <div style="align-self:flex-end;margin-top:6px;">
+                <span class="forgot-link">&#x00BF;Recordar usuario o cambiar contrasena?</span>
+              </div>
+              <div class="btn-green">Ingresar</div>
+            </div>
+          </div>
+          <div class="footer-sector">Sector empleo</div>
+          <div class="footer-logos">
+            <span class="footer-logo-pill">MinTrabajo</span>
+            <span class="footer-logo-pill">Org. Solidarias</span>
+            <span class="footer-logo-pill">Serv. Empleo</span>
+            <span class="footer-logo-pill">Supersubsidio</span>
+            <span class="footer-logo-pill">Colpensiones</span>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Comportamiento:</strong> Al montar, ejecuta <code>validateSession()</code>. Si hay cookies validas, redirige automaticamente. Campos vacios, boton habilitado.
+      </div>
+    </div>
+
+    <!-- 1B: Filling form -->
+    <div class="state-card">
+      <div class="state-label info">
+        <span>Llenando Formulario</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout">
+            <div class="login-slider">
+              <div>
+                <div style="font-size:.8rem;margin-bottom:4px;">&#x1F4CA;</div>
+                <div>Slider Promocional</div>
+                <div class="login-slider-dots">
+                  <span></span><span class="active"></span><span></span>
+                </div>
+              </div>
+            </div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+              <div class="mock-label">Numero de documento</div>
+              <div class="mock-input focus-border"><span class="typed">1032456789</span></div>
+              <div class="mock-label">Contrasena</div>
+              <div class="mock-input">
+                <span class="dots">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                <span class="eye-icon">&#x1F441;</span>
+              </div>
+              <div style="align-self:flex-end;margin-top:6px;">
+                <span class="forgot-link">&#x00BF;Recordar usuario o cambiar contrasena?</span>
+              </div>
+              <div class="btn-green">Ingresar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Inputs:</strong> Sanitizado con DOMPurify. El icono de ojo alterna visibilidad del password. Refs para acceso directo al DOM.
+      </div>
+    </div>
+
+    <!-- 1C: Loading -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Autenticando...</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout" style="filter: blur(1px); opacity:.6;">
+            <div class="login-slider"><div>Slider</div></div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+              <div class="mock-label">Numero de documento</div>
+              <div class="mock-input"><span class="typed">1032456789</span></div>
+              <div class="mock-label">Contrasena</div>
+              <div class="mock-input"><span class="dots">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+              <div class="btn-green disabled"><div class="spinner"></div> Ingresando...</div>
+            </div>
+          </div>
+          <!-- Global loader overlay -->
+          <div class="swal-overlay">
+            <div style="text-align:center;">
+              <div class="spinner-blue" style="margin:0 auto 8px;"></div>
+              <div style="color:#fff;font-size:.65rem;font-weight:600;">Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Trigger:</strong> <code>showLoader(true)</code> activa el loader global. POST a <code>/login/autenticar</code> con {userName, password}.
+      </div>
+    </div>
+
+    <!-- 1D: Error -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error de Autenticacion</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout" style="filter:blur(2px);opacity:.4;">
+            <div class="login-slider"><div>Slider</div></div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+            </div>
+          </div>
+          <div class="swal-overlay">
+            <div class="swal-box">
+              <div class="swal-icon error">&#x2716;</div>
+              <div class="swal-title">Oops...</div>
+              <div class="swal-text">Ocurrio un error al iniciar sesion, por favor intenta de nuevo</div>
+              <div class="swal-btn ok">OK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Causa:</strong> API retorna <code>status === 'error'</code>. Credenciales invalidas, usuario no encontrado, o error de red. Usuario permanece en <code>/login</code>.
+      </div>
+    </div>
+
+    <!-- 1E: Success -->
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Login Exitoso &rarr; Redirect</span>
+        <span class="route-tag">/login &rarr; /gestor_usuarios</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout" style="opacity:.3;">
+            <div class="login-slider"><div>Slider</div></div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+            </div>
+          </div>
+          <div class="swal-overlay" style="background:rgba(0,0,0,.15);">
+            <div style="text-align:center;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#f0fdf4;border:2px solid var(--green-ok);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:var(--green-ok);font-size:1.2rem;">&#x2714;</div>
+              <div style="color:#fff;font-size:.7rem;font-weight:700;">Redirigiendo...</div>
+              <div style="color:#ccc;font-size:.55rem;margin-top:2px;">Guardando cookies y contexto</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Flujo:</strong> 1) Cifra userId via <code>/login/cifrar_id/{id}</code> &rarr; 2) Actualiza AuthContext + UserInfo &rarr; 3) Guarda cookies httpOnly (3 dias) &rarr; 4) <code>router.push(data.module)</code>
+      </div>
+    </div>
+
+    <!-- 1F: Auto-redirect (existing session) -->
+    <div class="state-card">
+      <div class="state-label warning">
+        <span>Sesion Existente &rarr; Auto-Redirect</span>
+        <span class="route-tag">/login &rarr; /[modulo]</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="centered-screen" style="min-height:200px;">
+            <div style="text-align:center;">
+              <div class="spinner-blue" style="margin:0 auto 10px;"></div>
+              <div style="font-size:.68rem;font-weight:600;color:var(--text-dark);">Validando sesion...</div>
+              <div style="font-size:.55rem;color:var(--text-primary);margin-top:3px;">Cookies detectadas, redirigiendo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Condicion:</strong> <code>user !== 'false' && isLogged !== 'false'</code>. Llama <code>GetServerCookiesData()</code>, detecta sesion activa, redirige a ruta guardada sin mostrar formulario.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 2: RECUPERAR CONTRASENA          ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div class="flow-connector"><div class="arrow-down"></div><span class="arrow-label">Click "&#x00BF;Recordar usuario o cambiar contrasena?"</span></div>
+
+<section class="flow-section" id="recovery">
+  <div class="flow-section-title"><span class="step-num">2</span> Recuperar Contrasena</div>
+  <div class="flow-section-subtitle">/recuperar_contrasena &mdash; El usuario elige entre recuperar su usuario o cambiar su contrasena. Se envia un correo.</div>
+
+  <div class="state-grid">
+
+    <!-- 2A: Initial - no selection -->
+    <div class="state-card">
+      <div class="state-label default">
+        <span>Sin Seleccion</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> &#x00BF;Que deseas realizar?</h3>
+              <p>Recordar su usuario en el sistema o cambiar su contrasena</p>
+              <div class="toggle-btns">
+                <div class="toggle-btn">Contrasena</div>
+                <div class="toggle-btn">Usuario</div>
+              </div>
+              <div style="height:40px;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#adb5bd;">Seleccione una opcion arriba</div>
+              <div class="btn-submit" style="opacity:.4;">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Ningun boton seleccionado.</strong> El campo de input no se muestra hasta que se elige "Contrasena" o "Usuario". Submit deshabilitado visualmente.
+      </div>
+    </div>
+
+    <!-- 2B: Password selected -->
+    <div class="state-card">
+      <div class="state-label info">
+        <span>Modo: Recuperar Contrasena</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> &#x00BF;Que deseas realizar?</h3>
+              <p>Recordar su usuario en el sistema o cambiar su contrasena</p>
+              <div class="toggle-btns">
+                <div class="toggle-btn selected">Contrasena</div>
+                <div class="toggle-btn">Usuario</div>
+              </div>
+              <div style="text-align:left;width:90%;">
+                <div class="mock-label" style="margin-top:0;">Usuario</div>
+                <div class="mock-input focus-border"><span class="typed">jperez_sena</span></div>
+              </div>
+              <div class="btn-submit">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Input:</strong> <code>loginName</code> (texto). Se envia POST a <code>/forgot-password</code> con <code>&#123;userType: 'password', loginName&#125;</code>.
+      </div>
+    </div>
+
+    <!-- 2C: Username selected -->
+    <div class="state-card">
+      <div class="state-label info">
+        <span>Modo: Recordar Usuario</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> &#x00BF;Que deseas realizar?</h3>
+              <p>Recordar su usuario en el sistema o cambiar su contrasena</p>
+              <div class="toggle-btns">
+                <div class="toggle-btn">Contrasena</div>
+                <div class="toggle-btn selected">Usuario</div>
+              </div>
+              <div style="text-align:left;width:90%;">
+                <div class="mock-label" style="margin-top:0;">Numero de documento</div>
+                <div class="mock-input focus-border"><span class="typed">1032456789</span></div>
+              </div>
+              <div class="btn-submit">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Input:</strong> <code>numberDocument</code> (numerico). Se envia POST a <code>/rememberUser</code> con <code>&#123;userType: 'numberDocument', numberDocument&#125;</code>.
+      </div>
+    </div>
+
+    <!-- 2D: Validation Error -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error de Validacion</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="position:relative;">
+              <h3><span class="icon-sync">&#x21BB;</span> &#x00BF;Que deseas realizar?</h3>
+              <p>Recordar su usuario en el sistema o cambiar su contrasena</p>
+              <div class="toggle-btns">
+                <div class="toggle-btn">Contrasena</div>
+                <div class="toggle-btn">Usuario</div>
+              </div>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon error">&#x2716;</div>
+                <div class="swal-title">Error</div>
+                <div class="swal-text">Seleccione que desea recuperar: usuario o contrasena.</div>
+                <div class="swal-btn ok">OK</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Validaciones:</strong> 1) No selecciono tipo &rarr; "Seleccione que desea recuperar" / 2) Campo vacio &rarr; "Ingrese su nombre de usuario" o "Ingrese su numero de documento".
+      </div>
+    </div>
+
+    <!-- 2E: Processing -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Procesando Solicitud</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="filter:blur(1px);opacity:.4;">
+              <h3>&#x00BF;Que deseas realizar?</h3>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon loading"><div class="spinner-blue" style="width:18px;height:18px;border-width:2px;"></div></div>
+                <div class="swal-title">Procesando...</div>
+                <div class="swal-text">Por favor, espere mientras se procesa su solicitud.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>SweetAlert2:</strong> <code>allowOutsideClick: false</code>, spinner activo. No se puede cerrar hasta que la API responda.
+      </div>
+    </div>
+
+    <!-- 2F: Success -->
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Correo Enviado &rarr; Redirect</span>
+        <span class="route-tag">/recuperar_contrasena &rarr; /login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="filter:blur(1px);opacity:.3;">
+              <h3>&#x00BF;Que deseas realizar?</h3>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon success">&#x2714;</div>
+                <div class="swal-title">Exito</div>
+                <div class="swal-text">Se ha enviado un correo con instrucciones para recuperar su contrasena.</div>
+                <div class="swal-btn green">OK</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Despues de confirmar:</strong> <code>router.push('/login')</code>. Si modo "Usuario", el texto cambia a "Se ha enviado su nombre de usuario al correo registrado."
+      </div>
+    </div>
+
+    <!-- 2G: API Error -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error del Servidor</span>
+        <span class="route-tag">/recuperar_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="filter:blur(1px);opacity:.3;">
+              <h3>&#x00BF;Que deseas realizar?</h3>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon error">&#x2716;</div>
+                <div class="swal-title">Error</div>
+                <div class="swal-text">No se pudo procesar la solicitud.</div>
+                <div class="swal-btn ok">OK</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Causa:</strong> API retorna error o catch de excepcion de red. El usuario permanece en la pagina y puede reintentar.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 3: RESTAURAR CONTRASENA          ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div class="flow-connector"><div class="arrow-down"></div><span class="arrow-label">Link del correo con token + email</span></div>
+
+<section class="flow-section" id="reset">
+  <div class="flow-section-title"><span class="step-num">3</span> Restaurar Contrasena</div>
+  <div class="flow-section-subtitle">/cambio_contrasena?token=XXX&amp;email=YYY &mdash; El usuario llega desde el link del correo. Ingresa nueva contrasena.</div>
+
+  <div class="state-grid">
+
+    <!-- 3A: Loading (Suspense) -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Cargando (Suspense)</span>
+        <span class="route-tag">/cambio_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div style="text-align:center;">
+              <div class="spinner-blue" style="margin:0 auto 10px;"></div>
+              <div style="font-size:.7rem;color:var(--text-primary);font-weight:500;">Cargando formulario...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Suspense fallback</strong> mientras <code>useSearchParams()</code> se resuelve del lado del cliente. Dura milisegundos.
+      </div>
+    </div>
+
+    <!-- 3B: Initial form -->
+    <div class="state-card">
+      <div class="state-label default">
+        <span>Formulario Vacio</span>
+        <span class="route-tag">/cambio_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> Restaurar contrasena</h3>
+              <p>Por favor, ingrese su nueva contrasena...</p>
+              <div style="text-align:left;width:90%;">
+                <div class="mock-label" style="margin-top:0;">Nueva Contrasena</div>
+                <div class="mock-input">
+                  <span class="placeholder">Ingrese contrasena...</span>
+                  <span class="eye-icon" style="font-size:.7rem;">&#x1F441;</span>
+                </div>
+                <div class="mock-label">Confirmar Contrasena</div>
+                <div class="mock-input">
+                  <span class="placeholder">Confirme contrasena...</span>
+                  <span class="eye-icon" style="font-size:.7rem;">&#x1F441;</span>
+                </div>
+              </div>
+              <div class="btn-submit" style="margin-top:14px;">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Parametros URL:</strong> <code>token</code> y <code>email</code> extraidos con <code>useSearchParams()</code>. Se envian junto al body del POST.
+      </div>
+    </div>
+
+    <!-- 3C: Validation error - weak password -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error: Contrasena Debil</span>
+        <span class="route-tag">/cambio_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> Restaurar contrasena</h3>
+              <p>Por favor, ingrese su nueva contrasena...</p>
+              <div style="text-align:left;width:90%;">
+                <div class="mock-label" style="margin-top:0;">Nueva Contrasena</div>
+                <div class="mock-input error-border"><span class="typed">abc123</span></div>
+                <div class="mock-label">Confirmar Contrasena</div>
+                <div class="mock-input error-border"><span class="typed">abc123</span></div>
+              </div>
+              <div class="alert-error">
+                La contrasena debe tener al menos 8 caracteres, incluir mayusculas, minusculas, numeros y simbolos especiales (permitidos .,@,$,!,%,*,?,&,#,^,(,),_,+,~).
+              </div>
+              <div class="btn-submit" style="margin-top:10px;">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Regex:</strong> <code>/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.@$!%*?&#^()_+~])&#123;8,&#125;$/</code>. Error inline con MUI Alert <code>severity="error"</code>.
+      </div>
+    </div>
+
+    <!-- 3D: Validation error - mismatch -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error: No Coinciden</span>
+        <span class="route-tag">/cambio_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card">
+              <h3><span class="icon-sync">&#x21BB;</span> Restaurar contrasena</h3>
+              <p>Por favor, ingrese su nueva contrasena...</p>
+              <div style="text-align:left;width:90%;">
+                <div class="mock-label" style="margin-top:0;">Nueva Contrasena</div>
+                <div class="mock-input"><span class="dots">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+                <div class="mock-label">Confirmar Contrasena</div>
+                <div class="mock-input error-border"><span class="dots">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+              </div>
+              <div class="alert-error">Las contrasenas no coinciden.</div>
+              <div class="btn-submit" style="margin-top:10px;">Enviar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Comparacion:</strong> <code>newPassword !== confirmPassword</code>. Error inline, la solicitud no se envia al servidor.
+      </div>
+    </div>
+
+    <!-- 3E: Processing -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Actualizando Contrasena</span>
+        <span class="route-tag">/cambio_contrasena</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="filter:blur(1px);opacity:.3;">
+              <h3>Restaurar contrasena</h3>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon loading"><div class="spinner-blue" style="width:18px;height:18px;border-width:2px;"></div></div>
+                <div class="swal-title">Procesando...</div>
+                <div class="swal-text">Por favor espere mientras se actualiza la contrasena.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>POST:</strong> <code>/reset-password</code> con <code>&#123;newPassword, confirmPassword, token, us_email_institucional&#125;</code>.
+      </div>
+    </div>
+
+    <!-- 3F: Success -->
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Contrasena Actualizada</span>
+        <span class="route-tag">/cambio_contrasena &rarr; /login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen">
+            <div class="form-card" style="filter:blur(1px);opacity:.2;">
+              <h3>Restaurar contrasena</h3>
+            </div>
+            <div class="swal-overlay" style="border-radius:0;">
+              <div class="swal-box">
+                <div class="swal-icon success">&#x2714;</div>
+                <div class="swal-title">Contrasena Actualizada</div>
+                <div class="swal-text">La contrasena ha sido actualizada exitosamente</div>
+                <div class="swal-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Auto-redirect:</strong> <code>timer: 2000</code>, <code>showConfirmButton: false</code>. Barra de progreso visible. Despues de 2s &rarr; <code>router.push('/login')</code>.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 4: DASHBOARD (PROTECTED)         ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div class="flow-connector"><div class="arrow-down"></div><span class="arrow-label">Login exitoso &rarr; ProtectedRoute verifica sesion</span></div>
+
+<section class="flow-section" id="dashboard">
+  <div class="flow-section-title"><span class="step-num">4</span> Dashboard / Ruta Protegida</div>
+  <div class="flow-section-subtitle">/gestor_usuarios (u otro modulo) &mdash; ProtectedRoute verifica cookies, fetch user info, valida rol.</div>
+
+  <div class="state-grid">
+
+    <!-- 4A: Verifying session -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Verificando Sesion</span>
+        <span class="route-tag">/gestor_usuarios</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen" style="min-height:280px;">
+            <div style="text-align:center;">
+              <div class="spinner-blue" style="margin:0 auto 10px;"></div>
+              <div style="font-size:.72rem;font-weight:600;color:var(--text-dark);">Cargando...</div>
+              <div style="font-size:.55rem;color:var(--text-primary);margin-top:4px;">ProtectedRoute validando cookies y roles</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Flujo:</strong> 1) <code>getSession()</code> lee httpOnly cookies &rarr; 2) Fetch <code>/login/user_info/{user}</code> &rarr; 3) Valida rol contra ruta &rarr; 4) Render o redirect.
+      </div>
+    </div>
+
+    <!-- 4B: Authorized - dashboard shown -->
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Autorizado &rarr; Dashboard</span>
+        <span class="route-tag">/gestor_usuarios</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="dashboard-layout">
+            <div class="sidebar-mock">
+              <div class="sidebar-icon active" title="Gestor Usuarios">GU</div>
+              <div class="sidebar-icon" title="Proyectos">PR</div>
+              <div class="sidebar-icon" title="Reportes">RE</div>
+              <div class="sidebar-icon" title="Config">CF</div>
+            </div>
+            <div class="dash-content">
+              <div class="dash-topbar">
+                <span class="title">Gestor de Usuarios</span>
+                <div class="user-pill">
+                  <div class="user-avatar">LC</div>
+                  <span>Leyson C.</span>
+                </div>
+              </div>
+              <div class="dash-card">
+                <div style="font-weight:600;margin-bottom:6px;color:var(--text-dark);">Usuarios del sistema</div>
+                <div style="display:flex;gap:6px;margin-bottom:6px;">
+                  <div style="flex:1;background:var(--bg-primary);border-radius:4px;padding:6px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:700;color:var(--sena-green);">142</div>
+                    <div style="font-size:.48rem;">Activos</div>
+                  </div>
+                  <div style="flex:1;background:var(--bg-primary);border-radius:4px;padding:6px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:700;color:var(--text-primary);">8</div>
+                    <div style="font-size:.48rem;">Roles</div>
+                  </div>
+                  <div style="flex:1;background:var(--bg-primary);border-radius:4px;padding:6px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:700;color:var(--text-dark);">33</div>
+                    <div style="font-size:.48rem;">Regionales</div>
+                  </div>
+                </div>
+                <div style="height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;"><div style="width:70%;height:100%;background:var(--sena-green);border-radius:3px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Renderizado:</strong> Sidebar izquierdo (toggleable), topbar con titulo y perfil, area de contenido. Context actualizado con datos frescos del API.
+      </div>
+    </div>
+
+    <!-- 4C: No session -> redirect to login -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Sin Sesion &rarr; Redirect Login</span>
+        <span class="route-tag">/gestor_usuarios &rarr; /login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen" style="min-height:260px;">
+            <div style="text-align:center;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#fef2f2;border:2px solid var(--red);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:1rem;">&#x26A0;</div>
+              <div style="font-size:.7rem;font-weight:700;color:var(--text-dark);">Sesion no valida</div>
+              <div style="font-size:.55rem;color:var(--text-primary);margin-top:4px;">Redirigiendo a /login...</div>
+              <div style="margin-top:8px;"><div class="spinner-blue" style="width:16px;height:16px;border-width:2px;margin:0 auto;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Condicion:</strong> Cookies inexistentes o <code>isLogged === 'false'</code>. Limpia cookies &rarr; <code>redirect('/login')</code>. Retorna null.
+      </div>
+    </div>
+
+    <!-- 4D: No role access -> redirect to assigned module -->
+    <div class="state-card">
+      <div class="state-label warning">
+        <span>Sin Acceso al Modulo</span>
+        <span class="route-tag">/admin &rarr; /gestor_usuarios</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="centered-screen" style="min-height:260px;">
+            <div style="text-align:center;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#fefce8;border:2px solid #f59e0b;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:#f59e0b;font-size:1rem;">&#x1F512;</div>
+              <div style="font-size:.7rem;font-weight:700;color:var(--text-dark);">Acceso denegado</div>
+              <div style="font-size:.55rem;color:var(--text-primary);margin-top:4px;">Rol no autorizado para esta ruta</div>
+              <div style="font-size:.52rem;color:var(--text-primary);margin-top:2px;">Redirigiendo a modulo asignado...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Logica:</strong> Extrae <code>currentUrl.split('/')[1]</code>, compara contra <code>user.roles[]</code>. Si no coincide &rarr; redirect al modulo asignado. Excepcion: rutas <code>/prueba</code>.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 5: UPDATE PERSONAL INFO          ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div class="flow-connector"><div class="arrow-down"></div><span class="arrow-label">Click en perfil de usuario</span></div>
+
+<section class="flow-section" id="profile">
+  <div class="flow-section-title"><span class="step-num">5</span> Actualizar Informacion Personal</div>
+  <div class="flow-section-subtitle">/update_personal_info &mdash; El usuario autenticado puede editar su perfil, foto y contrasena.</div>
+
+  <div class="state-grid">
+
+    <!-- 5A: Loading data -->
+    <div class="state-card">
+      <div class="state-label loading">
+        <span>Cargando Datos</span>
+        <span class="route-tag">/update_personal_info</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="dashboard-layout">
+            <div class="sidebar-mock">
+              <div class="sidebar-icon">GU</div>
+            </div>
+            <div class="dash-content">
+              <div class="dash-topbar">
+                <span class="title">Edicion informacion personal</span>
+                <span style="font-size:.55rem;color:var(--sena-green);cursor:pointer;">&larr; Volver</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;min-height:180px;">
+                <div class="spinner-blue"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Fetch:</strong> <code>loadTypeDocuments()</code> + <code>loadInfoUser()</code> en paralelo. Loader global activo.
+      </div>
+    </div>
+
+    <!-- 5B: Form filled -->
+    <div class="state-card">
+      <div class="state-label default">
+        <span>Formulario Cargado</span>
+        <span class="route-tag">/update_personal_info</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="dashboard-layout">
+            <div class="sidebar-mock">
+              <div class="sidebar-icon">GU</div>
+            </div>
+            <div class="dash-content" style="padding:10px;">
+              <div class="dash-topbar" style="margin-bottom:8px;">
+                <span class="title" style="font-size:.65rem;">Edicion informacion personal</span>
+                <span style="font-size:.5rem;color:var(--sena-green);">&larr; Volver</span>
+              </div>
+              <div class="profile-sections">
+                <!-- Section 1 -->
+                <div>
+                  <div class="profile-section-title">Informacion Personal</div>
+                  <div class="field-row">
+                    <div class="field-mock"><div class="flabel">Tipo documento</div><div class="finput disabled">CC</div></div>
+                    <div class="field-mock"><div class="flabel">No. documento</div><div class="finput disabled">1032456789</div></div>
+                  </div>
+                  <div class="field-row" style="margin-top:4px;">
+                    <div class="field-mock"><div class="flabel">Nombres</div><div class="finput">Leyson Fabian</div></div>
+                    <div class="field-mock"><div class="flabel">Apellidos</div><div class="finput">Castano Perez</div></div>
+                  </div>
+                </div>
+                <!-- Section 2 -->
+                <div>
+                  <div class="profile-section-title">Informacion Corporativa</div>
+                  <div class="field-row">
+                    <div class="field-mock"><div class="flabel">Correo corp.</div><div class="finput disabled">lcastano@sena.edu.co</div></div>
+                    <div class="field-mock"><div class="flabel">Profesion</div><div class="finput">Ing. Sistemas</div></div>
+                  </div>
+                </div>
+                <!-- Section 3 -->
+                <div>
+                  <div class="profile-section-title">Informacion de Acceso</div>
+                  <div class="field-row">
+                    <div class="field-mock"><div class="flabel">Usuario</div><div class="finput">lcastano</div></div>
+                    <div class="field-mock"><div class="flabel">Contrasena</div><div class="finput">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn-submit" style="margin-top:8px;max-width:200px;">Guardar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Campos deshabilitados:</strong> tipo documento, numero documento, correo corporativo, tipo vinculacion. Foto de perfil acepta solo imagenes.
+      </div>
+    </div>
+
+    <!-- 5C: Success -->
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Perfil Actualizado</span>
+        <span class="route-tag">/update_personal_info &rarr; /gestor_usuarios</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="dashboard-layout" style="filter:blur(1px);opacity:.3;">
+            <div class="sidebar-mock"><div class="sidebar-icon">GU</div></div>
+            <div class="dash-content"></div>
+          </div>
+          <div class="swal-overlay">
+            <div class="swal-box">
+              <div class="swal-icon success">&#x2714;</div>
+              <div class="swal-title">Proceso exitoso</div>
+              <div class="swal-text">El usuario se ha actualizado correctamente</div>
+              <div class="swal-btn green">OK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>POST-exito:</strong> Actualiza <code>nameImage</code> en contexto, guarda ruta en cookies, redirige al modulo home.
+      </div>
+    </div>
+
+    <!-- 5D: Error -->
+    <div class="state-card">
+      <div class="state-label error">
+        <span>Error al Actualizar</span>
+        <span class="route-tag">/update_personal_info</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="dashboard-layout" style="filter:blur(1px);opacity:.3;">
+            <div class="sidebar-mock"><div class="sidebar-icon">GU</div></div>
+            <div class="dash-content"></div>
+          </div>
+          <div class="swal-overlay">
+            <div class="swal-box">
+              <div class="swal-icon error">&#x2716;</div>
+              <div class="swal-title">Upss...</div>
+              <div class="swal-text">Ocurrio un error al actualizar la informacion personal</div>
+              <div class="swal-btn ok">OK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Causa:</strong> Error de API o validacion de imagen fallida. El usuario permanece en la pagina para reintentar.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SCREEN 6: LOGOUT                        ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div class="flow-connector"><div class="arrow-down"></div><span class="arrow-label">Click "Cerrar sesion"</span></div>
+
+<section class="flow-section" id="logout">
+  <div class="flow-section-title"><span class="step-num">6</span> Logout</div>
+  <div class="flow-section-subtitle">Limpia AuthContext, destruye cookies httpOnly, redirige a /login.</div>
+
+  <div class="state-grid">
+
+    <div class="state-card">
+      <div class="state-label warning">
+        <span>Cerrando Sesion</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="centered-screen" style="min-height:260px;">
+            <div style="text-align:center;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#fefce8;border:2px solid #f59e0b;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">&#x1F44B;</div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--text-dark);">Cerrando sesion...</div>
+              <div style="font-size:.55rem;color:var(--text-primary);margin-top:4px;">Limpiando contexto y cookies</div>
+              <div style="margin-top:10px;"><div class="spinner-blue" style="width:16px;height:16px;border-width:2px;margin:0 auto;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Flujo:</strong> 1) <code>logout()</code> en AuthContext (reset a estado inicial) &rarr; 2) Server Action borra cookies (escribe 'false') &rarr; 3) <code>redirect('/login')</code>. Sesion destruida.
+      </div>
+    </div>
+
+    <div class="state-card">
+      <div class="state-label success">
+        <span>Sesion Cerrada &rarr; Login</span>
+        <span class="route-tag">/login</span>
+      </div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="green-bar"></div>
+          <div class="nav-bar">
+            <span class="nav-logo">Dir. Formacion Profesional</span>
+            <span class="nav-logo-sena">SENA</span>
+          </div>
+          <div class="login-layout">
+            <div class="login-slider">
+              <div>
+                <div style="font-size:.8rem;margin-bottom:4px;">&#x1F4CA;</div>
+                <div>Slider Promocional</div>
+              </div>
+            </div>
+            <div class="login-form-area">
+              <div class="sena-logo-placeholder">SENA</div>
+              <div class="mock-label">Numero de documento</div>
+              <div class="mock-input"><span class="placeholder">Ingrese su documento...</span></div>
+              <div class="mock-label">Contrasena</div>
+              <div class="mock-input"><span class="placeholder">Ingrese su contrasena...</span></div>
+              <div class="btn-green">Ingresar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Estado final:</strong> Login limpio, sin datos pre-cargados, contexto reseteado. El ciclo puede reiniciar.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ FLOW MAP ══════════════ -->
+<section class="flow-section">
+  <div class="flow-section-title"><span class="step-num" style="background:var(--text-dark);">&#x2727;</span> Mapa Completo del Flujo</div>
+  <div class="flow-section-subtitle">Vision general de todas las transiciones entre pantallas.</div>
+
+  <div style="background:#fff;border-radius:14px;padding:28px;box-shadow:var(--shadow);font-size:.72rem;line-height:2;font-family:monospace;overflow-x:auto;">
+<pre style="margin:0;white-space:pre-wrap;">
+<strong>/login</strong> (Entry Point)
+  |
+  +-- [Sesion valida en cookies] -----------> <span style="color:var(--sena-green)">Redirect a modulo asignado</span>
+  |
+  +-- [Credenciales validas] ---------------> <span style="color:var(--sena-green)">Cifrar ID -> Guardar cookies -> Redirect a modulo</span>
+  |
+  +-- [Credenciales invalidas] -------------> <span style="color:var(--red)">SweetAlert Error -> Permanece en /login</span>
+  |
+  +-- [Click "Recordar/Cambiar"] -----------> <strong>/recuperar_contrasena</strong>
+       |
+       +-- [Modo "Contrasena"] --> POST /forgot-password
+       |    +-- [Exito] --> <span style="color:var(--sena-green)">Email enviado -> Redirect /login</span>
+       |    +-- [Error] --> <span style="color:var(--red)">SweetAlert Error -> Permanece</span>
+       |
+       +-- [Modo "Usuario"] --> POST /rememberUser
+       |    +-- [Exito] --> <span style="color:var(--sena-green)">Email enviado -> Redirect /login</span>
+       |    +-- [Error] --> <span style="color:var(--red)">SweetAlert Error -> Permanece</span>
+       |
+       +-- [Link del correo] --> <strong>/cambio_contrasena?token=X&email=Y</strong>
+            |
+            +-- [Contrasena valida] --> POST /reset-password
+            |    +-- [Exito] --> <span style="color:var(--sena-green)">Timer 2s -> Redirect /login</span>
+            |    +-- [Error] --> <span style="color:var(--red)">SweetAlert Error -> Permanece</span>
+            |
+            +-- [Validacion falla] --> <span style="color:var(--red)">Alert inline (MUI) -> Permanece</span>
+
+<strong>/[modulo_protegido]</strong> (ProtectedRoute)
+  |
+  +-- [Sin cookies] -----------------------> <span style="color:var(--red)">Redirect /login</span>
+  +-- [API error] --------------------------> <span style="color:var(--red)">Logout -> Redirect /login</span>
+  +-- [Rol no autorizado] ------------------> <span style="color:#f59e0b">Redirect a modulo asignado</span>
+  +-- [Autorizado] -------------------------> <span style="color:var(--sena-green)">Render contenido</span>
+       |
+       +-- [Click perfil] --> <strong>/update_personal_info</strong>
+       |    +-- [Guardar exito] --> <span style="color:var(--sena-green)">SweetAlert -> Redirect home</span>
+       |    +-- [Guardar error] --> <span style="color:var(--red)">SweetAlert Error -> Permanece</span>
+       |
+       +-- [Logout] --> <span style="color:#f59e0b">Limpiar context + cookies -> Redirect /login</span>
+</pre>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<div style="text-align:center;padding:40px 20px;color:var(--text-primary);font-size:.72rem;">
+  <div style="font-weight:700;color:var(--text-dark);">SIGER - Onboarding Flow States</div>
+  <div style="margin-top:4px;">SENA - Direccion de Formacion Profesional &middot; Generado para import a Figma</div>
+  <div style="margin-top:4px;opacity:.6;">Tip: Usa una herramienta de screenshot como CleanShot para capturar cada tarjeta e importarla a Figma.</div>
+</div>
+
+</body>
+</html>
